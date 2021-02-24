@@ -114,35 +114,6 @@ esui$AgeGroup <- car::recode(esui$age,"lo:30=1;31:49=2;50:69=3;70:hi=4")
 table(esui$deathweekdays)
 a <- table(esui$deathday) %>% as.data.frame() %>% arrange(Freq)
 
-#时间序列
-esui$AgeGroup <- as.factor(esui$AgeGroup)
-esui$deathyearN <- car::recode(esui$deathyear,"2001:2005='1';2006:2010='2';2011:2015='3';2016:2020='4'")
-
-popage <- popage %>% filter(!is.na(popage$AgeGroup)) #popage含合计项
-popage <- popage %>% filter(Year>=2001)
-popage$AgeGroupN <- car::recode(popage$AgeGroup,"c('0-','1-','5-','10-','15-','20-','25-')='1';c('30-','35-','40-','45-')='2';
- c('50-','55-','60-','65-')='3';else='4'")
-popage$YearN <- car::recode(popage$Year,"2001:2005='1';2006:2010='2';2011:2015='3';2016:2020='4'")
-popage$Sex <- as.factor(popage$Sex)
-popage$AgeGroupN <- as.factor(popage$AgeGroupN)
-popyear <- popage %>% group_by(YearN,Sex) %>% summarise(count=sum(count,na.rm = T))
-
-#分月份
-esuiym <- esui %>% count(deathyearN,deathmonth,sex)
-
-esuiympop <- left_join(esuiym,popyear,by=c('deathyearN'='YearN','sex'='Sex'))
-esuiympop$rate <- esuiympop$n/esuiympop$count*100000
-
-# 折线图(率) year*sex
-esuiympop$deathyearN <- as.factor(esuiympop$deathyearN)
-ggplot(esuiympop,aes(x=deathmonth,y=rate,group=interaction(deathyearN,sex),color=deathyearN,linetype=sex)) + geom_line(size=2)+
-  scale_x_continuous(breaks = seq(1,12,1))+
-  scale_y_continuous(expand = c(0,0),limits = c(0,0.75))+
-  # title="Number of suicide death:2000-2020",
-  labs(x="Year", y="Death Number")+ #标题横纵标目
-  guides(color=guide_legend(title="Gender"))+
-  scale_color_lancet()+theme_hc()
-
 
 # 热力图
 #all
